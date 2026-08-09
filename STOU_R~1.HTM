@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บันทึกการอ่านหนังสือ STOU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --grad1:#7F5AF0;
+    --grad2:#FF6FB5;
+    --grad3:#37D9C4;
+    --bg:#F4F3FB;
+    --card:#FFFFFF;
+    --text:#2B2140;
+    --muted:#8A8298;
+    --not-started:#C9C4D8;
+    --in-progress:#FFB648;
+    --completed:#33D3A8;
+    --danger:#FF5C6C;
+    --shadow: 0 8px 24px rgba(90,60,160,0.10);
+    --shadow-sm: 0 2px 8px rgba(90,60,160,0.08);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Kanit','Segoe UI',sans-serif;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(127,90,240,0.10), transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(255,111,181,0.12), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .topbar{
+    background:linear-gradient(120deg, var(--grad1), #9B6BFF 45%, var(--grad2));
+    padding:28px 20px 90px;
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+  }
+  .topbar::after{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 80% -20%, rgba(255,255,255,0.25), transparent 55%);
+  }
+  .topbar-inner{max-width:1000px;margin:0 auto;position:relative;z-index:1;}
+  .app-title{display:flex;align-items:center;gap:12px;font-size:26px;font-weight:700;margin:0 0 4px;}
+  .app-sub{font-size:14px;opacity:0.9;margin:0;}
+  .wrap{max-width:1000px;margin:-60px auto 0;padding:0 20px;position:relative;z-index:2;}
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+    margin-bottom:20px;
+  }
+  .setup-card{max-width:520px;margin:60px auto;}
+  .setup-card h2{margin-top:0;}
+  label{font-size:13px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px;}
+  input[type=text], input[type=number], input[type=date]{
+    width:100%;
+    padding:10px 12px;
+    border:1.5px solid #E6E1F5;
+    border-radius:10px;
+    font-family:inherit;
+    font-size:14px;
+    background:#FBFAFF;
+    color:var(--text);
+    transition:border-color .15s;
+  }
+  input:focus{outline:none;border-color:var(--grad1);}
+  .field{margin-bottom:16px;}
+  .field .hint{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    border:none;border-radius:12px;
+    padding:10px 18px;
+    font-family:inherit;font-size:14px;font-weight:600;
+    cursor:pointer;
+    transition:transform .12s, box-shadow .12s, opacity .12s;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:linear-gradient(120deg,var(--grad1),var(--grad2));color:#fff;box-shadow:0 6px 16px rgba(127,90,240,0.35);}
+  .btn-primary:hover{opacity:0.92;}
+  .btn-ghost{background:#F0EDFB;color:var(--grad1);}
+  .btn-ghost:hover{background:#E5DFFA;}
+  .btn-soft{background:#EAFBF6;color:#0FA588;}
+  .btn-soft:hover{background:#DAF7EF;}
+  .btn-danger{background:#FFEDEF;color:var(--danger);}
+  .btn-danger:hover{background:#FFDEE1;}
+  .btn-sm{padding:6px 12px;font-size:12.5px;border-radius:9px;}
+  .btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .btn:disabled:hover{opacity:0.45;}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-bottom:6px;}
+
+  .subject-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;}
+  .subject-header h1{font-size:20px;margin:0 0 2px;}
+  .subject-header .code{color:var(--grad1);font-weight:700;}
+  .subject-header .name{color:var(--muted);font-size:14px;}
+
+  .round-switcher{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid #F1EEFA;}
+  .round-pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .round-pills-label{font-size:12.5px;color:var(--muted);font-weight:600;margin-right:2px;}
+  .round-pill{border:1.5px solid #E6E1F5;background:#FBFAFF;color:var(--text);padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .round-pill:hover{border-color:var(--grad1);}
+  .round-pill.active{background:linear-gradient(120deg,var(--grad1),var(--grad2));color:#fff;border-color:transparent;}
+  .round-pill.done:not(.active){border-color:#B9F1DF;color:#0FA588;background:#EAFBF5;}
+
+  .position-banner{margin-top:16px;padding:14px 18px;border-radius:14px;background:linear-gradient(120deg,#EEF2FF,#FDF0FF);border:1.5px solid #E1D9FA;font-size:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .position-banner .dot{width:10px;height:10px;border-radius:50%;background:var(--grad1);flex:none;animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,90,240,0.5);}70%{box-shadow:0 0 0 8px rgba(127,90,240,0);}100%{box-shadow:0 0 0 0 rgba(127,90,240,0);}}
+  .position-banner b{color:var(--grad1);}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:18px;}
+  .stat{
+    background:#FBFAFF;border-radius:14px;padding:14px 16px;
+    border:1.5px solid #EFEBFA;
+  }
+  .stat .num{font-size:26px;font-weight:700;background:linear-gradient(120deg,var(--grad1),var(--grad2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stat .lbl{font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+  .progress-bar{height:12px;border-radius:8px;background:#EFEBFA;overflow:hidden;margin-top:16px;}
+  .progress-bar > div{height:100%;background:linear-gradient(120deg,var(--grad3),#22C6AE);border-radius:8px;transition:width .3s;}
+
+  .congrats{
+    margin-top:16px;padding:16px 18px;border-radius:14px;
+    background:linear-gradient(120deg,#FFF6E5,#E9FFF7);
+    border:1.5px solid #FFE6A8;
+    font-size:14px;
+  }
+
+  #chaptersList{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
+    gap:10px;
+  }
+
+  .chapter-card{
+    background:var(--card);border-radius:16px;box-shadow:var(--shadow-sm);
+    overflow:hidden; border-left:6px solid var(--not-started);
+  }
+  .chapter-card.status-in_progress{border-left-color:var(--in-progress);}
+  .chapter-card.status-completed{border-left-color:var(--completed);}
+
+  .chapter-card.open{grid-column:1 / -1;}
+
+  .chapter-card.tile{
+    cursor:pointer;
+    padding:16px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:96px;
+    transition:box-shadow .15s, transform .1s;
+  }
+  .chapter-card.tile:hover{box-shadow:var(--shadow);transform:translateY(-1px);}
+  .tile-inner{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
+  .tile-title{font-weight:600;font-size:12.5px;}
+  .tile-inner .badge{font-size:10px;padding:3px 8px;}
+
+  .chapter-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;cursor:pointer;gap:10px;flex-wrap:wrap;
+  }
+  .chapter-head-left{display:flex;align-items:center;gap:12px;}
+  .chapter-num{
+    width:36px;height:36px;border-radius:50%;
+    background:#F0EDFB;color:var(--grad1);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none;
+  }
+  .status-completed .chapter-num{background:var(--completed);color:#fff;}
+  .status-in_progress .chapter-num{background:var(--in-progress);color:#fff;}
+  .chapter-title{font-weight:600;font-size:15px;}
+  .chapter-meta{font-size:12.5px;color:var(--muted);}
+  .badge{
+    font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;
+    background:#EDEAFB;color:var(--grad1);
+  }
+  .badge.completed{background:#E0FBF3;color:#0FA588;}
+  .badge.in_progress{background:#FFF3E0;color:#E08A00;}
+  .badge.not_started{background:#F1EFF7;color:var(--muted);}
+  .chapter-right{display:flex;align-items:center;gap:10px;}
+  .chev{transition:transform .2s;color:var(--muted);}
+  .chapter-card.open .chev{transform:rotate(180deg);}
+
+  .chapter-body{display:none;padding:0 18px 18px;border-top:1px solid #F1EEFA;}
+  .chapter-card.open .chapter-body{display:block;}
+
+  .complete-toggle{
+    margin-top:16px;padding:14px 16px;border-radius:14px;
+    background:#FBFAFF;border:1.5px solid #EFEBFA;
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+    transition:background .15s, border-color .15s;
+  }
+  .complete-toggle.is-complete{background:#EAFBF5;border-color:#B9F1DF;}
+  .complete-toggle .checkbox-row{margin:0;}
+  .complete-toggle label.chk-label{font-size:14.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .complete-toggle input[type=checkbox]{width:20px;height:20px;accent-color:#0FA588;cursor:pointer;}
+  .complete-toggle .field{margin-bottom:0;min-width:170px;}
+
+  .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  @media (max-width:560px){.subgrid{grid-template-columns:1fr;}}
+
+  .score-box{background:#FBFAFF;border-radius:12px;padding:12px 14px;border:1.5px solid #EFEBFA;}
+  .score-box .row{display:flex;gap:10px;align-items:center;}
+  .score-box label{margin-bottom:4px;}
+
+  table.logs{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px;}
+  table.logs th{
+    text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;
+    text-transform:uppercase;letter-spacing:.03em;
+    padding:6px 8px;border-bottom:1.5px solid #F1EEFA;
+  }
+  table.logs td{padding:8px;border-bottom:1px solid #F6F4FC;}
+  table.logs tr:last-child td{border-bottom:none;}
+
+  .add-log-form{margin-top:16px;background:#FBFAFF;border:1.5px dashed #D9D2F0;border-radius:14px;padding:16px;}
+  .section-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;}
+  .section-row .field{flex:1;margin-bottom:0;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin:14px 0;}
+  .checkbox-row input{width:18px;height:18px;accent-color:var(--grad1);}
+  .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;}
+
+  .empty-hint{font-size:13px;color:var(--muted);padding:14px 0;text-align:center;}
+
+  .footer-note{max-width:1000px;margin:30px auto 0;padding:0 20px;font-size:12.5px;color:var(--muted);line-height:1.7;}
+
+  .storage-alert{
+    margin-top:16px;padding:14px 16px;border-radius:14px;
+    background:#FFF0F1;border:2px solid #FFB3BA;
+    color:#D6273C;font-weight:700;font-size:15.5px;line-height:1.6;
+    display:flex;align-items:flex-start;gap:10px;
+  }
+  .storage-alert .icon{font-size:22px;flex:none;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#2B2140;color:#fff;padding:12px 22px;border-radius:12px;font-size:13.5px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    opacity:0;pointer-events:none;transition:all .25s;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .icon-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:4px 6px;border-radius:8px;}
+  .icon-btn:hover{background:#F1EEFA;color:var(--danger);}
+
+  input[type=file]{display:none;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <p class="app-title">📚 บันทึกการอ่านหนังสือ STOU</p>
+    <p class="app-sub" id="topbarSub">มหาวิทยาลัยสุโขทัยธรรมาธิราช — ติดตามความคืบหน้าการอ่านทั้ง 15 บท</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- SETUP VIEW -->
+  <div id="setupView" class="card setup-card hidden">
+    <h2>🎯 เริ่มต้นบันทึกวิชาใหม่</h2>
+    <p style="color:var(--muted);font-size:13.5px;margin-top:-8px;">ระบุรหัสวิชาและชื่อวิชาที่ต้องการติดตามการอ่าน (1 ไฟล์ใช้บันทึกได้ 1 วิชา)</p>
+    <div class="field">
+      <label>รหัสวิชา</label>
+      <input type="text" id="setupCode" placeholder="เช่น 10151">
+    </div>
+    <div class="field">
+      <label>ชื่อวิชา</label>
+      <input type="text" id="setupName" placeholder="เช่น ไทยศึกษา">
+    </div>
+    <button class="btn btn-primary" onclick="startSubject()">🚀 เริ่มบันทึก</button>
+    <div style="margin-top:14px;font-size:13px;color:var(--muted);">
+      มีไฟล์ข้อมูลเดิมอยู่แล้ว? <label for="importFileSetup" style="color:var(--grad1);font-weight:600;cursor:pointer;">นำเข้าข้อมูล (.json)</label>
+      <input type="file" id="importFileSetup" accept="application/json" onchange="importJSON(this.files[0])">
+    </div>
+  </div>
+
+  <!-- MAIN VIEW -->
+  <div id="mainView" class="hidden">
+
+    <div class="card">
+      <div class="toolbar">
+        <button class="btn btn-ghost btn-sm" onclick="openEditSubject()">✏️ แก้ไขข้อมูลวิชา</button>
+        <label class="btn btn-ghost btn-sm" for="importFileMain">⬆️ นำเข้า JSON</label>
+        <input type="file" id="importFileMain" accept="application/json" onchange="importJSON(this.files[0])">
+        <button class="btn btn-soft btn-sm" onclick="exportJSON()">💾 ส่งออก JSON</button>
+        <button class="btn btn-soft btn-sm" onclick="exportCSV()">📄 ส่งออก CSV</button>
+        <button class="btn btn-danger btn-sm" onclick="resetAll()">🗑️ ล้างข้อมูลทั้งหมด</button>
+      </div>
+
+      <div class="storage-alert">
+        <span class="icon">⚠️</span>
+        <span>ข้อมูลทั้งหมดถูกบันทึกไว้ใน Local Storage ของเบราว์เซอร์นี้เท่านั้น! กรุณากด "ส่งออก JSON" เก็บไว้เป็นระยะเพื่อสำรองข้อมูล มิฉะนั้นข้อมูลอาจสูญหายได้หากล้างแคชเบราว์เซอร์ หรือเปลี่ยนเครื่อง/เบราว์เซอร์</span>
+      </div>
+
+      <div id="editSubjectBox" class="hidden" style="margin-top:14px;background:#FBFAFF;border-radius:12px;padding:14px;border:1.5px dashed #D9D2F0;">
+        <div class="subgrid">
+          <div class="field"><label>รหัสวิชา</label><input type="text" id="editCode"></div>
+          <div class="field"><label>ชื่อวิชา</label><input type="text" id="editName"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost btn-sm" onclick="closeEditSubject()">ยกเลิก</button>
+          <button class="btn btn-primary btn-sm" onclick="saveEditSubject()">บันทึก</button>
+        </div>
+      </div>
+
+      <div class="subject-header" style="margin-top:16px;">
+        <div>
+          <h1><span class="code" id="dispCode"></span> — <span id="dispName"></span></h1>
+          <div class="name">ติดตามความคืบหน้าการอ่านทั้งหมด 15 บท</div>
+        </div>
+      </div>
+
+      <div id="roundSwitcherBox"></div>
+      <div id="positionBanner"></div>
+
+      <div class="progress-bar"><div id="progressFill" style="width:0%"></div></div>
+
+      <div class="stats-grid">
+        <div class="stat"><div class="num" id="statCompleted">0/15</div><div class="lbl">บทที่อ่านจบแล้ว (รอบนี้)</div></div>
+        <div class="stat"><div class="num" id="statDays">0</div><div class="lbl" title="นับจากจำนวนวันปฏิทินที่ไม่ซ้ำกันซึ่งมีการบันทึกการอ่านในรอบนี้ เพื่อไม่ให้นับซ้ำเมื่อวันเริ่มบทถัดไปตรงกับวันจบบทก่อนหน้า">จำนวนวันที่ใช้อ่านไปแล้ว (วัน)</div></div>
+        <div class="stat"><div class="num" id="statStart">-</div><div class="lbl">เริ่มอ่านวันแรก (รอบนี้)</div></div>
+        <div class="stat"><div class="num" id="statLast">-</div><div class="lbl">บันทึกล่าสุด</div></div>
+      </div>
+
+      <div id="congratsBox" class="congrats hidden"></div>
+    </div>
+
+    <div id="chaptersList"></div>
+
+    <div class="footer-note">
+      💡 <b>วิธีนับวัน:</b> "จำนวนวันที่ใช้อ่านไปแล้ว" นับจากจำนวน<b>วันปฏิทินที่ไม่ซ้ำกัน</b>ที่มีการบันทึกการอ่านในรอบนั้น ๆ
+      หากวันที่เริ่มอ่านบทถัดไปตรงกับวันที่อ่านจบบทก่อนหน้าพอดี วันนั้นจะถูกนับเพียงครั้งเดียวเท่านั้น
+      ส่วน "ระยะเวลา" ของแต่ละบทคำนวณจาก (วันที่อ่านจบบท − วันที่เริ่มบันทึกบทนั้นครั้งแรก) + 1 วัน<br>
+      ✅ แต่ละบทมีช่องติ๊ก "อ่านจบบทนี้แล้ว" แยกอิสระ พร้อมระบุ/แก้ไขวันที่อ่านจบได้เอง<br>
+      🔄 <b>รอบการอ่าน:</b> อ่านซ้ำได้หลายรอบ โดยต้องอ่านให้ครบทั้ง 15 บทในรอบปัจจุบันก่อน จึงจะเริ่มรอบใหม่ได้ ข้อมูลของแต่ละรอบจะแยกเก็บไว้ต่างหาก สลับดูย้อนหลังได้จากปุ่มรอบด้านบน<br>
+      📝 ช่อง "ตอนที่" รองรับการพิมพ์แบบ บท.ตอน เช่น <b>3.1</b> และสามารถพิมพ์หลายตอนคั่นด้วยจุลภาคในช่องเดียว เช่น <b>3.1,3.2,3.3</b> ได้ทันที (หรือจะกด "เพิ่มตอน" เพื่อแยกบรรทัดพร้อมระบุหน้าต่างกันก็ได้)<br>
+      📦 คลิกที่กล่องบทด้านล่างเพื่อคลี่ดูรายละเอียด บันทึกการอ่าน คะแนน และแก้ไขข้อมูลได้ (ดูคำเตือนเรื่องการสำรองข้อมูลด้านบนสุดของหน้า)
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== STATE ===================== */
+const STORAGE_KEY = 'stou_reading_tracker_v1';
+const TOTAL_CHAPTERS = 15;
+let state = null;
+let editingLog = { chapterIndex: null, logId: null }; // for edit-in-place
+let openChapters = new Set(); // which chapter cards are expanded
+
+function blankChapter(n){
+  return { number:n, logs:[], preTest:null, preTestMax:null, postTest:null, postTestMax:null, completed:false, completedDate:null };
+}
+function blankRound(num){
+  return { roundNumber:num, chapters: Array.from({length:TOTAL_CHAPTERS}, (_,i)=>blankChapter(i+1)) };
+}
+function blankState(){
+  return {
+    subjectCode:'', subjectName:'',
+    currentRound: 1,
+    rounds: [ blankRound(1) ]
+  };
+}
+
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return null;
+  try{
+    const parsed = JSON.parse(raw);
+    return normalizeState(parsed);
+  }catch(e){ return null; }
+}
+function normalizeChapters(srcChapters){
+  const chapters = Array.from({length:TOTAL_CHAPTERS}, (_,i)=>blankChapter(i+1));
+  if(Array.isArray(srcChapters)){
+    for(let i=0;i<TOTAL_CHAPTERS;i++){
+      const src = srcChapters[i];
+      if(src){
+        const logs = Array.isArray(src.logs)?src.logs.map(normalizeLog):[];
+        let completed = !!src.completed;
+        let completedDate = src.completedDate || null;
+        // backward-compat migration: older files stored "finishedChapter" per log entry
+        if(!completed && !completedDate){
+          const finishedLogs = logs.filter(l=>l.finishedChapter && l.date).map(l=>l.date).sort();
+          if(finishedLogs.length){
+            completed = true;
+            completedDate = finishedLogs[finishedLogs.length-1];
+          }
+        }
+        chapters[i] = {
+          number:i+1,
+          logs,
+          preTest: src.preTest ?? null,
+          preTestMax: src.preTestMax ?? null,
+          postTest: src.postTest ?? null,
+          postTestMax: src.postTestMax ?? null,
+          completed,
+          completedDate
+        };
+      }
+    }
+  }
+  return chapters;
+}
+function normalizeState(parsed){
+  const s = { subjectCode: parsed.subjectCode || '', subjectName: parsed.subjectName || '', currentRound: 1, rounds: [] };
+  if(Array.isArray(parsed.rounds) && parsed.rounds.length){
+    parsed.rounds.forEach((r,idx)=>{
+      s.rounds.push({ roundNumber: r.roundNumber || (idx+1), chapters: normalizeChapters(r.chapters) });
+    });
+    const wanted = Number(parsed.currentRound);
+    s.currentRound = (wanted>=1 && wanted<=s.rounds.length) ? wanted : s.rounds.length;
+  } else if(Array.isArray(parsed.chapters)){
+    // legacy single-round format
+    s.rounds.push({ roundNumber:1, chapters: normalizeChapters(parsed.chapters) });
+    s.currentRound = 1;
+  } else {
+    s.rounds.push(blankRound(1));
+    s.currentRound = 1;
+  }
+  return s;
+}
+function normalizeLog(l){
+  return {
+    id: l.id || genId(),
+    date: l.date || '',
+    sections: Array.isArray(l.sections)? l.sections.map(sec=>({section:sec.section ?? '', page:sec.page ?? ''})) : [],
+    finishedChapter: !!l.finishedChapter // kept only for reading legacy files; no longer set on new logs
+  };
+}
+function genId(){ return 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/* ===================== ROUND HELPERS ===================== */
+function currentRoundObj(){ return state.rounds[state.currentRound-1]; }
+function currentChapters(){ return currentRoundObj().chapters; }
+
+/* ===================== PURE CALC HELPERS ===================== */
+// Returns 'not_started' | 'in_progress' | 'completed'
+function chapterStatus(chapter){
+  if(chapter.completed && chapter.completedDate) return 'completed';
+  if(chapter.logs && chapter.logs.length>0) return 'in_progress';
+  return 'not_started';
+}
+function chapterDates(chapter){
+  return chapter.logs.filter(l=>l.date).map(l=>l.date).sort();
+}
+function chapterCompletedDate(chapter){
+  return (chapter.completed && chapter.completedDate) ? chapter.completedDate : null;
+}
+function chapterFirstDate(chapter){
+  const d = chapterDates(chapter);
+  if(d.length) return d[0];
+  if(chapter.completed && chapter.completedDate) return chapter.completedDate;
+  return null;
+}
+function daysBetween(dateStrA, dateStrB){
+  const a = new Date(dateStrA + 'T00:00:00');
+  const b = new Date(dateStrB + 'T00:00:00');
+  return Math.round((b-a) / 86400000);
+}
+function chapterDuration(chapter){
+  const status = chapterStatus(chapter);
+  if(status !== 'completed') return null;
+  const first = chapterFirstDate(chapter);
+  const done = chapterCompletedDate(chapter);
+  if(!first || !done) return null;
+  return daysBetween(first, done) + 1;
+}
+function chapterLastPage(chapter){
+  let last = null;
+  chapter.logs.forEach(l=>{
+    (l.sections||[]).forEach(sec=>{
+      if(sec.page !== '' && sec.page !== null && sec.page !== undefined){
+        if(last===null || Number(sec.page) > Number(last)) last = sec.page;
+      }
+    });
+  });
+  return last;
+}
+function chapterLastSection(chapter){
+  let lastDate = null, lastSec = null;
+  chapter.logs.forEach(l=>{
+    if(!l.date) return;
+    if(lastDate===null || l.date >= lastDate){
+      const secs = (l.sections||[]).map(s=>s.section).filter(s=>s!=='' && s!=null);
+      if(secs.length){
+        lastDate = l.date;
+        lastSec = secs[secs.length-1];
+      }
+    }
+  });
+  return lastSec;
+}
+// Union of unique calendar dates across ALL chapters of a round (avoids double counting overlap days)
+function overallUniqueDaysCount(allChapters){
+  const set = new Set();
+  allChapters.forEach(ch=> ch.logs.forEach(l=>{ if(l.date) set.add(l.date); }));
+  return set.size;
+}
+function overallDateRange(allChapters){
+  const set = new Set();
+  allChapters.forEach(ch=> ch.logs.forEach(l=>{ if(l.date) set.add(l.date); }));
+  const arr = Array.from(set).sort();
+  return { first: arr.length?arr[0]:null, last: arr.length?arr[arr.length-1]:null, count: arr.length };
+}
+function completedCount(allChapters){
+  return allChapters.filter(ch=>chapterStatus(ch)==='completed').length;
+}
+// Latest logged reading activity across a set of chapters -> {chapterNum, date, section, page}
+function latestActivity(allChapters){
+  let items = [];
+  allChapters.forEach(ch=>{
+    ch.logs.forEach(l=>{
+      if(!l.date || !l.sections || l.sections.length===0) return;
+      items.push({ chapterNum: ch.number, date: l.date, sections: l.sections });
+    });
+  });
+  if(items.length===0) return null;
+  items.sort((a,b)=> a.date===b.date ? a.chapterNum-b.chapterNum : a.date.localeCompare(b.date));
+  const top = items[items.length-1];
+  const lastSec = top.sections[top.sections.length-1];
+  return { chapterNum: top.chapterNum, date: top.date, section: lastSec.section, page: lastSec.page };
+}
+
+/* ===================== INIT / VIEW SWITCH ===================== */
+function init(){
+  state = loadState();
+  if(state && state.subjectCode){
+    showMain();
+  } else {
+    document.getElementById('setupView').classList.remove('hidden');
+    document.getElementById('mainView').classList.add('hidden');
+  }
+}
+function showMain(){
+  document.getElementById('setupView').classList.add('hidden');
+  document.getElementById('mainView').classList.remove('hidden');
+  render();
+}
+function startSubject(){
+  const code = document.getElementById('setupCode').value.trim();
+  const name = document.getElementById('setupName').value.trim();
+  if(!code || !name){ toast('กรุณาระบุรหัสวิชาและชื่อวิชา'); return; }
+  state = blankState();
+  state.subjectCode = code;
+  state.subjectName = name;
+  saveState();
+  showMain();
+}
+
+/* ===================== EDIT SUBJECT ===================== */
+function openEditSubject(){
+  document.getElementById('editCode').value = state.subjectCode;
+  document.getElementById('editName').value = state.subjectName;
+  document.getElementById('editSubjectBox').classList.remove('hidden');
+}
+function closeEditSubject(){
+  document.getElementById('editSubjectBox').classList.add('hidden');
+}
+function saveEditSubject(){
+  const code = document.getElementById('editCode').value.trim();
+  const name = document.getElementById('editName').value.trim();
+  if(!code || !name){ toast('กรุณาระบุรหัสวิชาและชื่อวิชา'); return; }
+  state.subjectCode = code;
+  state.subjectName = name;
+  saveState();
+  closeEditSubject();
+  render();
+  toast('บันทึกข้อมูลวิชาแล้ว');
+}
+
+/* ===================== ROUND SWITCHER ===================== */
+function switchRound(num){
+  state.currentRound = num;
+  openChapters = new Set();
+  render();
+}
+function startNewRound(){
+  const cur = currentRoundObj();
+  if(completedCount(cur.chapters) !== TOTAL_CHAPTERS){
+    toast('ต้องอ่านให้ครบทุกบทในรอบปัจจุบันก่อน จึงจะเริ่มรอบใหม่ได้');
+    return;
+  }
+  const newNum = state.rounds.length+1;
+  state.rounds.push(blankRound(newNum));
+  state.currentRound = newNum;
+  saveState();
+  openChapters = new Set();
+  render();
+  toast('🎉 เริ่มรอบที่ ' + newNum + ' แล้ว');
+}
+function renderRoundSwitcher(){
+  const pills = state.rounds.map(r=>{
+    const done = completedCount(r.chapters)===TOTAL_CHAPTERS;
+    const active = r.roundNumber===state.currentRound;
+    return `<button class="round-pill ${active?'active':''} ${done?'done':''}" onclick="switchRound(${r.roundNumber})">รอบที่ ${r.roundNumber}${done?' ✓':''}</button>`;
+  }).join('');
+  const canStartNew = completedCount(currentChapters())===TOTAL_CHAPTERS;
+  const disabledAttr = canStartNew ? '' : 'disabled';
+  const titleAttr = canStartNew ? 'title="เริ่มรอบอ่านใหม่ (ข้อมูลรอบเดิมจะยังอยู่)"' : 'title="อ่านให้ครบทุกบทในรอบนี้ก่อน จึงจะเริ่มรอบใหม่ได้"';
+  document.getElementById('roundSwitcherBox').innerHTML = `
+    <div class="round-switcher">
+      <div class="round-pills">
+        <span class="round-pills-label">รอบการอ่าน:</span>
+        ${pills}
+      </div>
+      <button class="btn btn-soft btn-sm" ${disabledAttr} ${titleAttr} onclick="startNewRound()">🔄 เริ่มรอบใหม่</button>
+    </div>`;
+}
+
+/* ===================== POSITION BANNER ===================== */
+function renderPositionBanner(){
+  const chapters = currentChapters();
+  const done = completedCount(chapters);
+  const box = document.getElementById('positionBanner');
+  if(done === TOTAL_CHAPTERS){
+    box.innerHTML = `<div class="position-banner"><span class="dot" style="background:#0FA588;"></span> 🎉 อ่านจบครบทุกบทแล้วในรอบที่ ${state.currentRound} — พร้อมเริ่มรอบใหม่ได้เลย!</div>`;
+    return;
+  }
+  const latest = latestActivity(chapters);
+  if(!latest){
+    box.innerHTML = `<div class="position-banner"><span class="dot"></span> ยังไม่มีการบันทึกการอ่านในรอบที่ ${state.currentRound} เริ่มบันทึกบทแรกได้เลย!</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="position-banner">
+    <span class="dot"></span>
+    📍 สถานะปัจจุบัน: อ่านถึง <b>บทที่ ${latest.chapterNum}</b>
+    ${latest.section!=='' ? ` · ตอนที่ <b>${latest.section}</b>` : ''}
+    ${latest.page!=='' ? ` · หน้า <b>${latest.page}</b>` : ''}
+    &nbsp;(บันทึกล่าสุด ${formatDateDisplay(latest.date)})
+  </div>`;
+}
+
+/* ===================== RENDER ===================== */
+function render(){
+  document.getElementById('dispCode').textContent = state.subjectCode;
+  document.getElementById('dispName').textContent = state.subjectName;
+  document.title = 'บันทึกการอ่าน STOU — ' + state.subjectCode;
+
+  renderRoundSwitcher();
+  renderPositionBanner();
+
+  const chapters = currentChapters();
+  const done = completedCount(chapters);
+  const pct = Math.round((done/TOTAL_CHAPTERS)*100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('statCompleted').textContent = done + '/' + TOTAL_CHAPTERS;
+
+  const range = overallDateRange(chapters);
+  document.getElementById('statDays').textContent = overallUniqueDaysCount(chapters);
+  document.getElementById('statStart').textContent = range.first ? formatDateDisplay(range.first) : '-';
+  document.getElementById('statLast').textContent = range.last ? formatDateDisplay(range.last) : '-';
+
+  const congratsBox = document.getElementById('congratsBox');
+  if(done === TOTAL_CHAPTERS){
+    congratsBox.classList.remove('hidden');
+    congratsBox.innerHTML = `🎉 <b>ยินดีด้วย! อ่านจบครบทั้ง 15 บทแล้วในรอบที่ ${state.currentRound}</b><br>
+      ใช้เวลารวมทั้งสิ้น <b>${range.count}</b> วัน (${formatDateDisplay(range.first)} – ${formatDateDisplay(range.last)})
+      เฉลี่ยบทละประมาณ <b>${(range.count/TOTAL_CHAPTERS).toFixed(1)}</b> วัน — กด "เริ่มรอบใหม่" ด้านบนได้เลยถ้าต้องการอ่านทบทวนอีกรอบ`;
+  } else {
+    congratsBox.classList.add('hidden');
+  }
+
+  const listEl = document.getElementById('chaptersList');
+  listEl.innerHTML = chapters.map(ch => renderChapterCard(ch)).join('');
+}
+
+function statusLabel(status){
+  return status==='completed' ? 'อ่านจบแล้ว' : status==='in_progress' ? 'กำลังอ่าน' : 'ยังไม่เริ่ม';
+}
+function statusLabelShort(status){
+  return status==='completed' ? 'จบแล้ว' : status==='in_progress' ? 'กำลังอ่าน' : 'ยังไม่เริ่ม';
+}
+function formatDateDisplay(d){
+  if(!d) return '-';
+  const dt = new Date(d + 'T00:00:00');
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()+543}`;
+}
+
+function renderChapterCard(ch){
+  const status = chapterStatus(ch);
+  const isOpen = openChapters.has(ch.number);
+  const duration = chapterDuration(ch);
+  const lastPage = chapterLastPage(ch);
+  const lastSection = chapterLastSection(ch);
+  const firstDate = chapterFirstDate(ch);
+  const completedDate = chapterCompletedDate(ch);
+
+  let metaText = 'ยังไม่มีการบันทึก';
+  if(status !== 'not_started'){
+    const parts = [];
+    if(lastSection!==null && lastSection!=='') parts.push('ตอนล่าสุด ' + lastSection);
+    if(lastPage!==null && lastPage!=='') parts.push('หน้า ' + lastPage);
+    if(status==='completed' && duration!==null) parts.push('ใช้เวลา ' + duration + ' วัน');
+    metaText = parts.join(' · ');
+  }
+
+  // Compact tile view (default, closed) — click to expand full detail below
+  if(!isOpen){
+    return `
+    <div class="chapter-card tile status-${status}" id="chapter-${ch.number}" onclick="toggleChapter(${ch.number})">
+      <div class="tile-inner">
+        <div class="chapter-num">${ch.number}</div>
+        <div class="tile-title">บทที่ ${ch.number}</div>
+        <span class="badge ${status}">${statusLabelShort(status)}</span>
+      </div>
+    </div>`;
+  }
+
+  // Expanded detail view — identical content/behavior as before
+  return `
+  <div class="chapter-card status-${status} open" id="chapter-${ch.number}">
+    <div class="chapter-head" onclick="toggleChapter(${ch.number})">
+      <div class="chapter-head-left">
+        <div class="chapter-num">${ch.number}</div>
+        <div>
+          <div class="chapter-title">บทที่ ${ch.number}</div>
+          <div class="chapter-meta">${metaText}</div>
+        </div>
+      </div>
+      <div class="chapter-right">
+        <span class="badge ${status}">${statusLabel(status)}</span>
+        <span class="chev">▾</span>
+      </div>
+    </div>
+    <div class="chapter-body">
+
+      <div class="complete-toggle ${ch.completed?'is-complete':''}">
+        <label class="chk-label">
+          <input type="checkbox" ${ch.completed?'checked':''} onchange="toggleChapterComplete(${ch.number}, this.checked)">
+          ✅ อ่านจบบทนี้แล้ว
+        </label>
+        ${ch.completed ? `<div class="field">
+          <label>วันที่อ่านจบบทนี้</label>
+          <input type="date" value="${ch.completedDate||''}" onchange="updateCompletedDate(${ch.number}, this.value)">
+        </div>` : ''}
+        ${status==='completed' && duration!==null ? `<div style="font-size:13px;color:#0FA588;font-weight:600;">รวมใช้เวลา ${duration} วัน (เริ่ม ${formatDateDisplay(firstDate)})</div>` : ''}
+      </div>
+
+      <div class="subgrid">
+        <div class="score-box">
+          <label>คะแนนสอบก่อนเรียน (Pre-test)</label>
+          <div class="row">
+            <input type="number" placeholder="คะแนนที่ได้" value="${ch.preTest ?? ''}" onchange="updateScore(${ch.number},'preTest',this.value)">
+            <span style="color:var(--muted);">/</span>
+            <input type="number" placeholder="เต็ม" value="${ch.preTestMax ?? ''}" onchange="updateScore(${ch.number},'preTestMax',this.value)">
+          </div>
+        </div>
+        <div class="score-box">
+          <label>คะแนนสอบหลังเรียน (Post-test)</label>
+          <div class="row">
+            <input type="number" placeholder="คะแนนที่ได้" value="${ch.postTest ?? ''}" onchange="updateScore(${ch.number},'postTest',this.value)">
+            <span style="color:var(--muted);">/</span>
+            <input type="number" placeholder="เต็ม" value="${ch.postTestMax ?? ''}" onchange="updateScore(${ch.number},'postTestMax',this.value)">
+          </div>
+        </div>
+      </div>
+
+      ${renderLogsTable(ch)}
+
+      <div style="margin-top:14px;">
+        <button class="btn btn-primary btn-sm" onclick="openAddLogForm(${ch.number})">➕ เพิ่มบันทึกการอ่าน</button>
+      </div>
+
+      <div id="addLogFormWrap-${ch.number}"></div>
+    </div>
+  </div>`;
+}
+
+function renderLogsTable(ch){
+  if(!ch.logs || ch.logs.length===0){
+    return `<div class="empty-hint">ยังไม่มีบันทึกการอ่านสำหรับบทนี้</div>`;
+  }
+  const sorted = [...ch.logs].sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+  const rows = sorted.map(l=>{
+    const secText = (l.sections||[]).map(s=>`ตอน ${s.section||'-'} (น.${s.page||'-'})`).join(', ');
+    return `<tr>
+      <td>${formatDateDisplay(l.date)}</td>
+      <td>${secText || '-'}</td>
+      <td style="text-align:right;">
+        <button class="icon-btn" title="แก้ไข" onclick="editLog(${ch.number}, '${l.id}')">✏️</button>
+        <button class="icon-btn" title="ลบ" onclick="deleteLog(${ch.number}, '${l.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  return `<table class="logs">
+    <thead><tr><th>วันที่บันทึก</th><th>ตอน / หน้า</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+/* ===================== CHAPTER INTERACTIONS ===================== */
+function toggleChapter(n){
+  if(openChapters.has(n)) openChapters.delete(n); else openChapters.add(n);
+  render();
+}
+function updateScore(chapterNum, field, value){
+  const ch = currentChapters()[chapterNum-1];
+  ch[field] = value===''? null : Number(value);
+  saveState();
+}
+function toggleChapterComplete(chapterNum, checked){
+  const ch = currentChapters()[chapterNum-1];
+  ch.completed = checked;
+  if(checked && !ch.completedDate){
+    const dates = chapterDates(ch);
+    ch.completedDate = dates.length ? dates[dates.length-1] : todayStr();
+  }
+  saveState();
+  openChapters.add(chapterNum);
+  render();
+  toast(checked ? '✅ ทำเครื่องหมายว่าอ่านจบบทนี้แล้ว' : 'ยกเลิกการทำเครื่องหมายอ่านจบบทแล้ว');
+}
+function updateCompletedDate(chapterNum, value){
+  const ch = currentChapters()[chapterNum-1];
+  ch.completedDate = value;
+  saveState();
+  render();
+}
+
+/* ===================== ADD / EDIT LOG FORM ===================== */
+function todayStr(){
+  const d = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+let formSectionRows = []; // {section, page}
+
+function openAddLogForm(chapterNum, logToEdit){
+  editingLog = { chapterIndex: chapterNum-1, logId: logToEdit ? logToEdit.id : null };
+  formSectionRows = logToEdit ? logToEdit.sections.map(s=>({...s})) : [{section:'',page:''}];
+  const dateVal = logToEdit ? logToEdit.date : todayStr();
+
+  const wrap = document.getElementById('addLogFormWrap-'+chapterNum);
+  wrap.innerHTML = `
+    <div class="add-log-form">
+      <div class="field">
+        <label>วันที่บันทึก</label>
+        <input type="date" id="logDate-${chapterNum}" value="${dateVal}">
+      </div>
+      <label>ตอนที่อ่าน (ระบุได้หลายตอน ในบทเดียวกัน)</label>
+      <div id="sectionRows-${chapterNum}"></div>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="addSectionRow(${chapterNum})">➕ เพิ่มตอน</button>
+      <div class="form-actions">
+        <button class="btn btn-ghost btn-sm" type="button" onclick="closeAddLogForm(${chapterNum})">ยกเลิก</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="submitLogForm(${chapterNum})">💾 บันทึก</button>
+      </div>
+    </div>`;
+  renderSectionRows(chapterNum);
+  openChapters.add(chapterNum);
+}
+function renderSectionRows(chapterNum){
+  const el = document.getElementById('sectionRows-'+chapterNum);
+  el.innerHTML = formSectionRows.map((row,idx)=>`
+    <div class="section-row">
+      <div class="field">
+        <label>ตอนที่</label>
+        <input type="text" inputmode="decimal" placeholder="เช่น 3.1 หรือ 3.1,3.2" value="${row.section}" onchange="updateSectionRow(${chapterNum},${idx},'section',this.value)">
+      </div>
+      <div class="field">
+        <label>อ่านถึงหน้า</label>
+        <input type="number" min="1" value="${row.page}" onchange="updateSectionRow(${chapterNum},${idx},'page',this.value)">
+      </div>
+      ${formSectionRows.length>1 ? `<button class="icon-btn" title="ลบตอนนี้" onclick="removeSectionRow(${chapterNum},${idx})">✖</button>` : ''}
+    </div>`).join('');
+}
+function addSectionRow(chapterNum){
+  formSectionRows.push({section:'',page:''});
+  renderSectionRows(chapterNum);
+}
+function removeSectionRow(chapterNum, idx){
+  formSectionRows.splice(idx,1);
+  renderSectionRows(chapterNum);
+}
+function updateSectionRow(chapterNum, idx, field, value){
+  formSectionRows[idx][field] = value;
+}
+function closeAddLogForm(chapterNum){
+  document.getElementById('addLogFormWrap-'+chapterNum).innerHTML = '';
+  editingLog = {chapterIndex:null, logId:null};
+}
+// Expands rows where "ตอนที่" contains comma-separated values (e.g. "3.1,3.2,3.3")
+// into individual section entries, all sharing that row's page value.
+function expandSectionRows(rows){
+  const expanded = [];
+  rows.forEach(row=>{
+    const secRaw = (row.section ?? '').toString().trim();
+    const pageRaw = row.page;
+    if(secRaw==='' && (pageRaw===''||pageRaw==null)) return;
+    if(secRaw.indexOf(',')>-1){
+      secRaw.split(',').map(s=>s.trim()).filter(s=>s!=='').forEach(s=>{
+        expanded.push({section:s, page:pageRaw});
+      });
+    } else {
+      expanded.push({section:secRaw, page:pageRaw});
+    }
+  });
+  return expanded;
+}
+function submitLogForm(chapterNum){
+  const dateVal = document.getElementById('logDate-'+chapterNum).value;
+  if(!dateVal){ toast('กรุณาระบุวันที่บันทึก'); return; }
+  const sections = expandSectionRows(formSectionRows);
+  if(sections.length===0){ toast('กรุณาระบุอย่างน้อย 1 ตอน'); return; }
+
+  const ch = currentChapters()[chapterNum-1];
+  const logData = {
+    id: editingLog.logId || genId(),
+    date: dateVal,
+    sections: sections
+  };
+  if(editingLog.logId){
+    const idx = ch.logs.findIndex(l=>l.id===editingLog.logId);
+    if(idx>-1) ch.logs[idx] = logData;
+  } else {
+    ch.logs.push(logData);
+  }
+  saveState();
+  closeAddLogForm(chapterNum);
+  render();
+  toast(editingLog.logId ? 'แก้ไขบันทึกแล้ว' : 'บันทึกข้อมูลการอ่านแล้ว');
+}
+function editLog(chapterNum, logId){
+  const ch = currentChapters()[chapterNum-1];
+  const log = ch.logs.find(l=>l.id===logId);
+  if(!log) return;
+  openAddLogForm(chapterNum, log);
+}
+function deleteLog(chapterNum, logId){
+  if(!confirm('ยืนยันลบบันทึกนี้หรือไม่?')) return;
+  const ch = currentChapters()[chapterNum-1];
+  ch.logs = ch.logs.filter(l=>l.id!==logId);
+  saveState();
+  render();
+  toast('ลบบันทึกแล้ว');
+}
+
+/* ===================== IMPORT / EXPORT ===================== */
+function exportJSON(){
+  const dataStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([dataStr], {type:'application/json'});
+  downloadBlob(blob, `stou_${state.subjectCode || 'reading'}_${todayStr()}.json`);
+  toast('ส่งออก JSON แล้ว (รวมทุกรอบ)');
+}
+function importJSON(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!parsed.subjectCode && !parsed.chapters && !parsed.rounds){
+        toast('ไฟล์นี้ไม่ใช่รูปแบบข้อมูลที่ถูกต้อง'); return;
+      }
+      state = normalizeState(parsed);
+      saveState();
+      openChapters = new Set();
+      showMain();
+      toast('นำเข้าข้อมูลสำเร็จ');
+    }catch(err){
+      toast('ไม่สามารถอ่านไฟล์นี้ได้: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+function csvEscape(v){
+  if(v===null || v===undefined) v='';
+  v = String(v);
+  if(/[",\n]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+function exportCSV(){
+  const headers = ['รอบที่','ประเภทแถว','บทที่','ตอนที่','อ่านถึงหน้า','วันที่บันทึก','สถานะบท','วันที่เริ่มบท','วันที่จบบท','ระยะเวลา(วัน)','คะแนนก่อนเรียน','คะแนนเต็มก่อนเรียน','คะแนนหลังเรียน','คะแนนเต็มหลังเรียน'];
+  const rows = [headers];
+
+  state.rounds.forEach(round=>{
+    round.chapters.forEach(ch=>{
+      const status = chapterStatus(ch);
+      const statusText = statusLabel(status);
+      const firstDate = chapterFirstDate(ch);
+      const doneDate = chapterCompletedDate(ch);
+      const duration = chapterDuration(ch);
+
+      if(ch.logs.length===0){
+        rows.push([round.roundNumber, 'สรุปบท', ch.number, '', '', '', statusText, firstDate||'', doneDate||'', duration??'', ch.preTest??'', ch.preTestMax??'', ch.postTest??'', ch.postTestMax??'']);
+      } else {
+        const sorted = [...ch.logs].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+        sorted.forEach(l=>{
+          const secs = l.sections && l.sections.length ? l.sections : [{section:'',page:''}];
+          secs.forEach((sec,i)=>{
+            rows.push([
+              round.roundNumber, 'บันทึกการอ่าน', ch.number, sec.section, sec.page, l.date,
+              i===0 ? statusText : '',
+              i===0 ? (firstDate||'') : '',
+              i===0 ? (doneDate||'') : '',
+              i===0 ? (duration??'') : '',
+              i===0 ? (ch.preTest??'') : '', i===0 ? (ch.preTestMax??'') : '',
+              i===0 ? (ch.postTest??'') : '', i===0 ? (ch.postTestMax??'') : ''
+            ]);
+          });
+        });
+      }
+    });
+  });
+
+  rows.push([]);
+  rows.push(['สรุปภาพรวม']);
+  rows.push(['รหัสวิชา', state.subjectCode]);
+  rows.push(['ชื่อวิชา', state.subjectName]);
+  rows.push(['จำนวนรอบที่เริ่มอ่าน', state.rounds.length]);
+  rows.push([]);
+  rows.push(['รอบที่','จำนวนบทที่อ่านจบ','วันที่เริ่มอ่านวันแรก','วันที่บันทึกล่าสุด','จำนวนวันที่ใช้อ่าน(นับวันไม่ซ้ำ)']);
+  state.rounds.forEach(round=>{
+    const range = overallDateRange(round.chapters);
+    rows.push([round.roundNumber, completedCount(round.chapters)+' / '+TOTAL_CHAPTERS, range.first||'-', range.last||'-', range.count]);
+  });
+
+  const csvContent = rows.map(r=> r.map(csvEscape).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csvContent], {type:'text/csv;charset=utf-8;'});
+  downloadBlob(blob, `stou_${state.subjectCode || 'reading'}_${todayStr()}.csv`);
+  toast('ส่งออก CSV แล้ว (รวมทุกรอบ)');
+}
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ===================== RESET / TOAST ===================== */
+function resetAll(){
+  if(!confirm('ต้องการล้างข้อมูลทั้งหมดและเริ่มวิชาใหม่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้ (แนะนำให้ส่งออก JSON เก็บไว้ก่อน)')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = null;
+  openChapters = new Set();
+  document.getElementById('setupCode').value='';
+  document.getElementById('setupName').value='';
+  document.getElementById('mainView').classList.add('hidden');
+  document.getElementById('setupView').classList.remove('hidden');
+}
+let toastTimer=null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('show'), 2600);
+}
+
+init();
+</script>
+</body>
+</html>
